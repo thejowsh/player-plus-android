@@ -1,18 +1,15 @@
 package com.overplay.test.playerplus
 
 import android.hardware.*
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Half.EPSILON
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.overplay.test.playerplus.databinding.ActivityMainBinding
 import java.util.*
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+
 
 /**
  * Created by Josh Basarte 2022-02-12
@@ -24,11 +21,12 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
     private lateinit var binding: ActivityMainBinding
     /** Exoplayer instance */
     private val player by lazy(LazyThreadSafetyMode.NONE) {
-        ExoPlayer.Builder(MainActivity@this)
+        ExoPlayer.Builder(MainActivity@ this)
             .build()
     }
-    private lateinit var mSensorManager : SensorManager
+    /** Pitch / Yaw listener */
     private lateinit var mOrientation: Orientation
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +34,6 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
         setContentView(binding.root)
 
         binding.videoView.player = player
-        mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mOrientation = Orientation(this)
     }
 
@@ -54,8 +51,10 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
 
     private fun initializePlayer() {
         val mediaItem = MediaItem
-            .fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/"+
-                    "sample/WeAreGoingOnBullrun.mp4") //  TODO: Load this from strings or something.
+            .fromUri(
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/" +
+                        "sample/WeAreGoingOnBullrun.mp4"
+            ) //  TODO: Load this from strings or something.
 
         player.setMediaItem(mediaItem)
         player.playWhenReady = true // TODO: Per requirement, call play() after 4s after media is load
@@ -68,7 +67,21 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
         mOrientation.stopListening()
     }
 
+    var initialPitch : Float? = null
     override fun onOrientationChanged(pitch: Float, roll: Float) {
-        Log.d("MAIN", "pitch:$pitch, roll:$roll")
+        if (initialPitch == null)
+            initialPitch = pitch
+        else {
+            adjustVolume(pitch)
+        }
+    }
+
+    private fun adjustVolume(pitch : Float) {
+        val delta = (initialPitch!! -pitch)
+        Log.d("MAIN", "Delta $delta , ${player.volume}")
+        if (delta <= -0.4)
+            player.volume = player.volume - 0.01f
+        else if (delta >= 0.4)
+            player.volume = player.volume + 0.01f
     }
 }
