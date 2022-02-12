@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SeekParameters
 import com.overplay.test.playerplus.databinding.ActivityMainBinding
+import com.squareup.seismic.ShakeDetector
 import java.util.*
 
 
@@ -15,7 +17,7 @@ import java.util.*
  * Created by Josh Basarte 2022-02-12
  * Main Activity containing the Media Player object.
  */
-class MainActivity : AppCompatActivity(), Orientation.Listener {
+class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Listener  {
 
     /** UI Binding object */
     private lateinit var binding: ActivityMainBinding
@@ -35,6 +37,13 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
 
         binding.videoView.player = player
         mOrientation = Orientation(this)
+
+        val sensorManager =  getSystemService(SENSOR_SERVICE) as SensorManager;
+        val sd = ShakeDetector(this);
+
+        // A non-zero delay is required for Android 12 and up (https://github.com/square/seismic/issues/24)
+        val sensorDelay = SensorManager.SENSOR_DELAY_GAME
+        sd.start(sensorManager, sensorDelay)
     }
 
     override fun onResume() {
@@ -76,13 +85,7 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
             adjustVolume(pitch)
         }
 
-//        if (initialRoll == null)
-//            initialRoll = roll
-//        else {
-            adjustCurrentPlayingTimestamp(pitch, roll)
-//        }
-//        if(initialRoll!= null && initialPitch != null)
-//            Log.d("MAIN", "pitch:${initialPitch!! -pitch} roll:${initialRoll!! - roll}")
+        adjustCurrentPlayingTimestamp(pitch, roll)
     }
 
     private fun adjustVolume(pitch : Float) {
@@ -104,5 +107,9 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
             player.seekTo(player.currentPosition + 100)
         else if (roll >= 1)
             player.seekTo(player.currentPosition - 100)
+    }
+
+    override fun hearShake() {
+        player.playWhenReady = false
     }
 }
