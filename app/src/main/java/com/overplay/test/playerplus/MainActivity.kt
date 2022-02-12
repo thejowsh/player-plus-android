@@ -68,20 +68,41 @@ class MainActivity : AppCompatActivity(), Orientation.Listener {
     }
 
     var initialPitch : Float? = null
+    var initialRoll : Float ? = null
     override fun onOrientationChanged(pitch: Float, roll: Float) {
         if (initialPitch == null)
             initialPitch = pitch
         else {
             adjustVolume(pitch)
         }
+
+//        if (initialRoll == null)
+//            initialRoll = roll
+//        else {
+            adjustCurrentPlayingTimestamp(pitch, roll)
+//        }
+//        if(initialRoll!= null && initialPitch != null)
+//            Log.d("MAIN", "pitch:${initialPitch!! -pitch} roll:${initialRoll!! - roll}")
     }
 
     private fun adjustVolume(pitch : Float) {
         val delta = (initialPitch!! -pitch)
-        Log.d("MAIN", "Delta $delta , ${player.volume}")
-        if (delta <= -0.4)
-            player.volume = player.volume - 0.01f
+        Log.d("MAIN", "Volume Delta $delta , ${player.volume}")
+        if (delta <= -0.6)
+            player.volume = player.volume - 0.1f
         else if (delta >= 0.4)
-            player.volume = player.volume + 0.01f
+            player.volume = player.volume + 0.1f
+    }
+
+    private fun adjustCurrentPlayingTimestamp(pitch : Float, roll : Float) {
+//        val delta = (initialRoll!! - roll)
+        // Log.d("MAIN", "SEEK Delta $delta , ${roll}, ${player.currentPosition}")
+        val delta = (initialPitch!! -pitch)
+        if (delta > 0.5 || delta < -0.5)
+            return
+        if (roll <= -1)
+            player.seekTo(player.currentPosition + 100)
+        else if (roll >= 1)
+            player.seekTo(player.currentPosition - 100)
     }
 }

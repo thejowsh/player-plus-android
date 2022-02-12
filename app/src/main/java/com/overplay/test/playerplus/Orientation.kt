@@ -10,7 +10,7 @@ import android.view.Surface
 import android.view.WindowManager
 
 private const val TAG = "Orientation"
-private const val SENSOR_DELAY_MICROS = 16 * 1000 // 16ms
+private const val SENSOR_DELAY_MICROS = 10 * 1000 * 1000 // 16ms
 
 /**
  * https://github.com/kplatfoot/android-rotation-sensor-sample
@@ -73,15 +73,15 @@ class Orientation(activity: Activity) : SensorEventListener {
 
         val (worldAxisForDeviceAxisX, worldAxisForDeviceAxisY) = when (mWindowManager.defaultDisplay.rotation) {
             Surface.ROTATION_0 -> Pair(SensorManager.AXIS_X, SensorManager.AXIS_Z)
-//            Surface.ROTATION_90 -> Pair(SensorManager.AXIS_Z, SensorManager.AXIS_MINUS_X)
-//            Surface.ROTATION_180 -> Pair(SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Z)
-//            Surface.ROTATION_270 -> Pair(SensorManager.AXIS_MINUS_Z, SensorManager.AXIS_X)
+            Surface.ROTATION_90 -> Pair(SensorManager.AXIS_Z, SensorManager.AXIS_MINUS_X)
+            Surface.ROTATION_180 -> Pair(SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Z)
+            Surface.ROTATION_270 -> Pair(SensorManager.AXIS_MINUS_Z, SensorManager.AXIS_X)
             else -> Pair(SensorManager.AXIS_X, SensorManager.AXIS_Z)
         }
 
         val adjustedRotationMatrix = FloatArray(9)
-//        SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
-//            worldAxisForDeviceAxisY, adjustedRotationMatrix)
+        SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
+            worldAxisForDeviceAxisY, adjustedRotationMatrix)
 
         // Transform rotation matrix into azimuth/pitch/roll
         val orientation = FloatArray(3)
@@ -91,7 +91,8 @@ class Orientation(activity: Activity) : SensorEventListener {
         val pitch = orientation[1] * -57
         val roll = orientation[2] * -57
 
-//        mListener?.onOrientationChanged(pitch, roll)
-        mListener?.onOrientationChanged(orientation[1], orientation[2])
+//        mListener?.onOrientationChanged(pitch, roll) // TODO: return azimuth
+        mListener?.onOrientationChanged(orientation[1], orientation[0])
+//        Log.d("MAIN", "pitch:${orientation[1]} roll:${orientation[2]} azimuth:${orientation[0]}")
     }
 }
