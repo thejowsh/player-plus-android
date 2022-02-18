@@ -22,11 +22,11 @@ Gradle 4.1.0 + Kotlin ext 1.4.21
 
 Google's Exoplayer to play media
 
-Android [GAME ROTATION VECTOR sensor])(https://source.android.com/devices/sensors/sensor-types#game_rotation_vector)
+Android [GAME ROTATION VECTOR sensor](https://source.android.com/devices/sensors/sensor-types#game_rotation_vector)
 and a modified verion of [this project](https://github.com/kplatfoot/android-rotation-sensor-sample)
 to measure device pitch and azimuth
 
-[Seismic](https://github.com/square/seismic to handle a *shake* gesture
+[Seismic](https://github.com/square/seismic) to handle a *shake* gesture
 
 Google Play Services' [FusedLocationClient](https://developer.android.com/training/location/request-updates#updates) to subscribe to location updates
 
