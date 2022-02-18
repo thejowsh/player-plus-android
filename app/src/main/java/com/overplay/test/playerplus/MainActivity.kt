@@ -3,15 +3,18 @@ package com.overplay.test.playerplus
 import android.Manifest
 import android.annotation.SuppressLint
 import android.hardware.*
+import android.hardware.display.DisplayManager
 import android.location.Location
 
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Looper
 import android.util.Log
+import android.view.Display
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -45,6 +48,8 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
     private lateinit var locationCallback: LocationCallback
     var initalLocation : Location? = null
 
+//    lateinit var myDisplay : Display
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -64,7 +69,7 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
         player.addListener(object : Player.Listener{
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
-                Log.d("Tick", "Playback state changed $playbackState")
+//                Log.d("Tick", "Playback state changed $playbackState")
                 if (playbackState == Player.STATE_READY) {
                     runTimer()
                 }
@@ -101,7 +106,7 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
                         initalLocation = location
                     }else {
                         val distanceTo = location.distanceTo(initalLocation)
-                        Log.d("Tick" , "This is the location: $distanceTo")
+//                        Log.d("Tick" , "This is the location: $distanceTo")
                         if (distanceTo >= 10) {
                             initalLocation = location
                             player.playWhenReady = false
@@ -113,8 +118,9 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
                 }
             }
         }
+//        myDisplay = (getSystemService(DISPLAY_SERVICE) as DisplayManager)
+//            .getDisplay(Display.DEFAULT_DISPLAY)
     }
-
 
     fun runTimer(){
         object : CountDownTimer(4000,1000){
@@ -197,9 +203,10 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
      * otherwise the video will automatically seek forward/backward
      */
     private fun adjustCurrentPlayingTimestamp(pitch : Float, roll : Float) {
+
 //        val delta = (initialRoll!! - roll)
-        // Log.d("MAIN", "SEEK Delta $delta , ${roll}, ${player.currentPosition}")
         val delta = (initialPitch!! -pitch)
+        Log.d("MAIN", "SEEK Delta $delta , ${roll}, ${player.currentPosition}")
         if (delta > 0.5 || delta < -0.5)
             return
         if (roll <= -1)

@@ -23,13 +23,13 @@
 <!--            &lt;!&ndash; Any inner elements would go here. &ndash;&gt;-->
 <!--        </service>-->
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
+            <!-- Keeping it simple set an orientation -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
-
 </manifest>
