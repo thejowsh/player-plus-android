@@ -93,6 +93,5 @@ class Orientation(activity: Activity) : SensorEventListener {
 
 //        mListener?.onOrientationChanged(pitch, roll) // TODO: return azimuth
         mListener?.onOrientationChanged(orientation[1], orientation[0])
-//        Log.d("MAIN", "pitch:${orientation[1]} roll:${orientation[2]} azimuth:${orientation[0]}")
     }
 }

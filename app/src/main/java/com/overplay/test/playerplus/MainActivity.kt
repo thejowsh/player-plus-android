@@ -48,7 +48,6 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
     private lateinit var locationCallback: LocationCallback
     var initalLocation : Location? = null
 
-//    lateinit var myDisplay : Display
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,10 +117,35 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
                 }
             }
         }
-//        myDisplay = (getSystemService(DISPLAY_SERVICE) as DisplayManager)
-//            .getDisplay(Display.DEFAULT_DISPLAY)
     }
 
+    override fun onResume() {
+        super.onResume()
+        /* Hide System UI */
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initializePlayer() // start playing video
+        mOrientation.startListening(this) // listen for pitch/yaw events
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Free resources
+        player.release()
+        mOrientation.stopListening()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    /**
+     * Runs a 4s countdown with 'ticking' updates to the UI.
+     */
     fun runTimer(){
         object : CountDownTimer(4000,1000){
             override fun onFinish() {
@@ -138,18 +162,6 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
         }.start()
     }
 
-    override fun onResume() {
-        super.onResume()
-        /* Hide System UI */
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        initializePlayer() // start playing video
-        mOrientation.startListening(this) // listen for pitch/yaw events
-    }
-
     private fun initializePlayer() {
         val mediaItem = MediaItem
             .fromUri(
@@ -160,20 +172,7 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
         player.setMediaItem(mediaItem)
     }
 
-    override fun onStop() {
-        super.onStop()
-        // Free resources
-        player.release()
-        mOrientation.stopListening()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
-
-//    var initialRoll : Float ? = null
+    /** Callback from Orientation class */
     override fun onOrientationChanged(pitch: Float, roll: Float) {
         if (initialPitch == null)
             initialPitch = pitch
@@ -182,6 +181,12 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
         }
 
         adjustCurrentPlayingTimestamp(pitch, roll)
+    }
+
+    /** Seismic callback */
+    override fun hearShake() {
+        /* Pause video when 'shake' occurs */
+        player.playWhenReady = false
     }
 
     /**
@@ -203,10 +208,9 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
      * otherwise the video will automatically seek forward/backward
      */
     private fun adjustCurrentPlayingTimestamp(pitch : Float, roll : Float) {
-
-//        val delta = (initialRoll!! - roll)
+        // TODO: Fix bug where player seeks when device is facing down */
         val delta = (initialPitch!! -pitch)
-        Log.d("MAIN", "SEEK Delta $delta , ${roll}, ${player.currentPosition}")
+//        Log.d("MAIN", "SEEK Delta $delta , ${roll}, ${player.currentPosition}")
         if (delta > 0.5 || delta < -0.5)
             return
         if (roll <= -1)
@@ -215,10 +219,7 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
             player.seekTo(player.currentPosition - 100)
     }
 
-    override fun hearShake() {
-        /* Pause video when 'shake' occurs */
-        player.playWhenReady = false
-    }
+
 
     /**
      * Location-based stuff
@@ -240,8 +241,8 @@ class MainActivity : AppCompatActivity(), Orientation.Listener, ShakeDetector.Li
 
     private fun createLocationRequest() = LocationRequest.create()
             .apply {
-            interval = 10000
+            interval = 10000 /* Request every 10s to prevent infinite-reset when location is not so accurate. */
             fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY /*Request for hiigh accuracy */
         }
 }
